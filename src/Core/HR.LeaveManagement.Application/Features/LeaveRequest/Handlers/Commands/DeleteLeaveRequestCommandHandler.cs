@@ -1,6 +1,6 @@
-﻿using HR.LeaveManagement.Application.Exceptions;
+﻿using HR.LeaveManagement.Application.Contracts.Persistence;
+using HR.LeaveManagement.Application.Exceptions;
 using HR.LeaveManagement.Application.Features.LeaveRequest.Requests.Commands;
-using HR.LeaveManagement.Application.Persistence.Contracts;
 using HR.LeaveManagement.Domain;
 using MediatR;
 
