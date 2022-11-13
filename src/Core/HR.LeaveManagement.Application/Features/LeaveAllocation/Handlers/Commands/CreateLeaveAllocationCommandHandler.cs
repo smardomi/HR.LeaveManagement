@@ -9,21 +9,19 @@ namespace HR.LeaveManagement.Application.Features.LeaveAllocation.Handlers.Comma
 {
     public class CreateLeaveAllocationCommandHandler : IRequestHandler<CreateLeaveAllocationCommand, BaseCommandResponse>
     {
-        private readonly ILeaveAllocationRepository _leaveAllocationRepository;
-        private readonly ILeaveTypeRepository _leaveTypeRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public CreateLeaveAllocationCommandHandler(ILeaveAllocationRepository leaveAllocationRepository, IMapper mapper, ILeaveTypeRepository leaveTypeRepository)
+        public CreateLeaveAllocationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _leaveAllocationRepository = leaveAllocationRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _leaveTypeRepository = leaveTypeRepository;
         }
 
         public async Task<BaseCommandResponse> Handle(CreateLeaveAllocationCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseCommandResponse();
-            var validator = new CreateLeaveAllocationDtoValidator(_leaveTypeRepository);
+            var validator = new CreateLeaveAllocationDtoValidator(_unitOfWork.LeaveTypeRepository);
             var validationResult = await validator.ValidateAsync(request.LeaveAllocationDto, cancellationToken);
 
             if (validationResult.IsValid == false)
@@ -36,7 +34,8 @@ namespace HR.LeaveManagement.Application.Features.LeaveAllocation.Handlers.Comma
             {
                 var leaveAllocation = _mapper.Map<Domain.LeaveAllocation>(request.LeaveAllocationDto);
 
-                leaveAllocation = await _leaveAllocationRepository.Add(leaveAllocation);
+                await _unitOfWork.LeaveAllocationRepository.Add(leaveAllocation);
+                await _unitOfWork.Save();
 
                 response.Success = true;
                 response.Message = "Allocations Successful";
